@@ -1,0 +1,50 @@
+plugins {
+	id "java"
+	id "org.teavm" version "0.10.1"
+}
+
+sourceSets {
+	"built" {}
+	"builder" {}
+	"web" {}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	builtImplementation "org.teavm:teavm-jso:0.10.1"
+	builtImplementation "org.teavm:teavm-jso-apis:0.10.1"
+	builtImplementation "org.ow2.asm:asm:9.6"
+	builtImplementation "org.ow2.asm:asm-tree:9.6"
+	
+	builderImplementation "org.teavm:teavm-tooling:0.10.1"
+	builderImplementation "org.teavm:teavm-core:0.10.1"
+	builderImplementation "org.teavm:teavm-classlib:0.10.1"
+}
+
+String teavmOut = layout.buildDirectory.dir("teavm-out").get().asFile.toString();
+
+TaskProvider steep = tasks.register("steep", JavaExec.class) {
+	group = "teavmfun"
+	
+	mainClass = "agency.highlysuspect.teavmfun.Builder"
+	classpath += sourceSets.builder.runtimeClasspath
+	classpath += sourceSets.built.runtimeClasspath
+	systemProperties = [
+		"in": sourceSets.built.output.classesDirs.asPath.toString(),
+	  "out": teavmOut,
+	]
+}
+
+tasks.register("makeWeb", Copy.class) {
+	group "teavmfun"
+	
+	from teavmOut
+	from sourceSets.web.resources
+	
+	into layout.buildDirectory.dir("asdffg")
+	
+	dependsOn steep
+}

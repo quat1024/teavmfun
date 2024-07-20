@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>My Movie</title>
+	<script type="module">
+		import { main, makeJar, dumpHier } from "./classes.mjs";
+		window.makeJar = makeJar; //for debugger
+		window.dumpHier = dumpHier;
+
+		main();
+
+		let id = (x) => document.getElementById(x);
+
+		document.addEventListener("DOMContentLoaded", (e) => {
+			id("file-picker").onchange = function(e) {
+				let file = this.files[0];
+
+				let reader = new FileReader();
+				reader.onload = () => {
+				  let data = new Uint8Array(reader.result);
+
+				  let results = id("results");
+				  while(results.firstChild) results.removeChild(results.firstChild);
+
+				  let ul = document.createElement("ul");
+				  results.appendChild(ul);
+
+				  dumpHier(data, (line) => {
+				  	let li = document.createElement("li");
+				  	li.innerHTML = line;
+				  	ul.appendChild(li);
+				  });
+				};
+				reader.readAsArrayBuffer(file);
+			}
+		});
+	</script>
+</head>
+<body>
+
+<p>
+Welcome to google chorme. Web 4.0 technogloy is here
+</p>
+
+<input type="file" id="file-picker"/>
+
+<div id="results" style="font-family:monospace"></div>
+
+</body>
+</html>
